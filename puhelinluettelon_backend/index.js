@@ -21,6 +21,7 @@ app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body"),
 );
 app.use(cors({ origin: "http://localhost:5173" }));
+app.use(express.static("dist"));
 
 // Endpoints
 app.get("/", (req, res) => {
