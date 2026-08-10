@@ -1,3 +1,3 @@
 # FSO-build
 
-## Backendin url: https://fso-build.onrender.com/
+## Sovelluksen url: https://fso-build.onrender.com/

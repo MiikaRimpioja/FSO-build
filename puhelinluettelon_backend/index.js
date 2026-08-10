@@ -5,8 +5,9 @@ const morgan = require("morgan");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const server = http.createServer(app);
-
 dotenv.config();
+const Person = require("./models/person");
+
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
@@ -29,25 +30,27 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/persons", (req, res) => {
-  res.json(persons);
+  Person.find({}).then((persons) => {
+    res.json(persons);
+  });
 });
 
 app.get("/api/persons/:id", (req, res) => {
   const id = Number(req.params.id);
-  const person = persons.find((person) => person.id === id);
-
-  if (person) {
-    res.json(person);
-  } else {
-    res.status(404).send("Person not found");
-  }
+  Person.findById(id).then((person) => {
+    if (person) {
+      res.json(person);
+    } else {
+      res.status(404).send("Person not found");
+    }
+  });
 });
 
 app.get("/info", (req, res) => {
   const date = new Date();
-  res.send(
-    `<p>Phonebook has info for ${persons.length} people</p><p>${date}</p>`,
-  );
+  Person.countDocuments().then((count) => {
+    res.send(`<p>Phonebook has info for ${count} people</p><p>${date}</p>`);
+  });
 });
 
 app.delete("/api/persons/:id", (req, res) => {
@@ -67,7 +70,9 @@ app.delete("/api/persons/:id", (req, res) => {
 });
 
 app.post("/api/persons", (req, res) => {
-  const { name, number } = req.body;
+  const body = req.body;
+  const name = body.name;
+  const number = body.number;
 
   if (!name || !number) {
     return res.status(400).send("Name and number are required");
@@ -77,35 +82,15 @@ app.post("/api/persons", (req, res) => {
   }
 
   const newPerson = {
-    id: Math.floor(Math.random() * 1000000),
     name,
     number,
   };
 
-  persons.push(newPerson);
-  res.status(201).json(newPerson);
+  Person.create(newPerson)
+    .then((savedPerson) => {
+      res.status(201).json(savedPerson);
+    })
+    .catch((error) => {
+      res.status(500).send("Internal Server Error");
+    });
 });
-
-// Sample data
-const persons = [
-  {
-    id: 1,
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: 2,
-    name: "Ada Lovelace",
-    number: "040-789012",
-  },
-  {
-    id: 3,
-    name: "Dan Abramov",
-    number: "040-345678",
-  },
-  {
-    id: 4,
-    name: "Mary Poppendieck",
-    number: "040-901234",
-  },
-];
