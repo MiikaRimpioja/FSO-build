@@ -70,27 +70,26 @@ app.delete("/api/persons/:id", (req, res) => {
 });
 
 app.post("/api/persons", (req, res) => {
-  const body = req.body;
-  const name = body.name;
-  const number = body.number;
+  const { name, number } = req.body;
 
   if (!name || !number) {
     return res.status(400).send("Name and number are required");
   }
-  if (persons.some((person) => person.name === name)) {
-    return res.status(400).send("Name must be unique");
-  }
 
-  const newPerson = {
-    name,
-    number,
-  };
+  Person.findOne({ name }).then((existing) => {
+    if (existing) {
+      return res.status(400).send("Name must be unique");
+    }
 
-  Person.create(newPerson)
-    .then((savedPerson) => {
-      res.status(201).json(savedPerson);
-    })
-    .catch((error) => {
-      res.status(500).send("Internal Server Error");
-    });
+    const newPerson = new Person({ name, number });
+
+    newPerson
+      .save()
+      .then((savedPerson) => {
+        res.status(201).json(savedPerson);
+      })
+      .catch((error) => {
+        res.status(500).send("Internal Server Error");
+      });
+  });
 });
