@@ -55,7 +55,7 @@ app.get("/info", (req, res) => {
 
 app.delete("/api/persons/:id", (req, res) => {
   const id = Number(req.params.id);
-  Person.findByIdAndRemove(id)
+  Person.findByIdAndDelete(id)
     .then((result) => {
       res.status(204).end();
     })
