@@ -54,19 +54,14 @@ app.get("/info", (req, res) => {
 });
 
 app.delete("/api/persons/:id", (req, res) => {
-  try {
-    const id = Number(req.params.id);
-    const person = persons.find((p) => p.id === id);
-
-    if (!person) {
-      return res.status(404).send("Person not found");
-    }
-
-    persons.splice(persons.indexOf(person), 1);
-    res.status(204).end();
-  } catch (error) {
-    res.status(500).send("Internal Server Error");
-  }
+  const id = Number(req.params.id);
+  Person.findByIdAndRemove(id)
+    .then((result) => {
+      res.status(204).end();
+    })
+    .catch((error) => {
+      res.status(500).send("Internal Server Error");
+    });
 });
 
 app.post("/api/persons", (req, res) => {
